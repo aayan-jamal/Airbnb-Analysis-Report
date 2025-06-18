@@ -1,191 +1,156 @@
-# Retail Sales Analysis SQL Project
+# 🏡 Airbnb NYC Data Analysis Project
 
-## Project Overview
+## Project 📌 Overview
 
-**Project Title**: Retail Sales Analysis  
-**Level**: Beginner  
-**Database**: `p1_retail_db`
+**Project Title**: Airbnb Analysis Report  
+**Level**: Intermediate  
+**Database**: `Airbnb_Open_Data`
 
-This project is designed to demonstrate SQL skills and techniques typically used by data analysts to explore, clean, and analyze retail sales data. The project involves setting up a retail sales database, performing exploratory data analysis (EDA), and answering specific business questions through SQL queries. This project is ideal for those who are starting their journey in data analysis and want to build a solid foundation in SQL.
+This project is designed to demonstrate python skills and techniques typically used by data analysts to explore, clean, and analyze Airbnb Analysis data. The project involves setting up a Airbnb open database, performing exploratory data analysis (EDA), and answering specific business questions through pyhton Libraries. This project is ideal for those who are starting their journey in data analysis and want to build a solid foundation in Pyhton in Data Analytics.
 
 ## Objectives
 
-1. **Set up a retail sales database**: Create and populate a retail sales database with the provided sales data.
+1. **Set up a Airbnb Open database**: Create and populate a Airbnb Booking database with the provided Aiebnb_open data.
 2. **Data Cleaning**: Identify and remove any records with missing or null values.
 3. **Exploratory Data Analysis (EDA)**: Perform basic exploratory data analysis to understand the dataset.
-4. **Business Analysis**: Use SQL to answer specific business questions and derive insights from the sales data.
+4. **Business Analysis**: Use python to answer specific business questions and derive insights from the Airbnb data.
 
 ## Project Structure
 
 ### 1. Database Setup
 
-- **Database Creation**: The project starts by creating a database named `p1_retail_db`.
-- **Table Creation**: A table named `retail_sales` is created to store the sales data. The table structure includes columns for transaction ID, sale date, sale time, customer ID, gender, age, product category, quantity sold, price per unit, cost of goods sold (COGS), and total sale amount.
+- **Download Dataset**: The project starts by download a database  `Airbnb_open_data`.
+  
+#2  first we import a library to perform on data
+-  import pandas as pd
+-  import numpy as np
+- import seaborn as sns
+- import matplotlib.pyplot as plt
 
-```sql
-CREATE DATABASE p1_retail_db;
+📊 Technologies Used
 
-CREATE TABLE retail_sales
-(
-    transactions_id INT PRIMARY KEY,
-    sale_date DATE,	
-    sale_time TIME,
-    customer_id INT,	
-    gender VARCHAR(10),
-    age INT,
-    category VARCHAR(35),
-    quantity INT,
-    price_per_unit FLOAT,	
-    cogs FLOAT,
-    total_sale FLOAT
-);
+- Python (Pandas, NumPy, Matplotlib, Seaborn)
+- Jupyter Notebook
+
+📂 Dataset
+
+- Source: Inside Airbnb Open Data
+- Format: CSV file (~50,000+ records)
+- Key columns: price, neighbourhood, room_type, reviews_per_month, last_review, etc.
+
+
+🧹 Data Cleaning
+
+- Converted last_review to datetime format
+- Replaced missing values in key columns like reviews_per_month and last_review
+- Dropped irrelevant or sparse columns (license, house_rules)
+- Converted price and service fee from string to float
+- Removed duplicates
+
+
+```pyhton
+# now we checking we a column data type and if some column have not data type are correct 
+# first we correct it data type
+
+df['last review'] = pd.to_datetime(df['last review'], errors = 'coerce')
+
+# we use errors ='coerce' iska mtlv hota hai ki yaha pai missing vlaue ho yeah uski 
+# jagah NaN fill krde meaning (Not a Number) isse humko easy hoga data pai performing krne le liyea
+
+**  Now we fill something in missing vlaue in columns
+
+df.fillna({'reviews per month' : 0, 'last review' : df['last review'].min()}, inplace=True)
+
+# Now we drop a missing value in least number of missing value in column
+# hum usme se missing value ko hatayenge jisme se missing value kam ho
+
+ ** df.dropna(subset = ['NAME', 'host name'], inplace=True)
+
+# now we delete a column thats does not need to a column
+
+** df = df.drop(columns=['license', 'house_rules'], errors='ignore')
+
+# remove dollar signs and convert to float
+ ** df['price'] = df['price'].replace('[\$,]', '', regex=True).astype(float)
+** df['service fee'] = df['service fee'].replace('[\$,]', '', regex=True).astype(float)
+
+# Now we remove All duplicate in this this is very good thing to performing a data
+
+ ** df.drop_duplicates(inplace = True)
+
 ```
 
-### 2. Data Exploration & Cleaning
+🔍 Exploratory Data Analysis (EDA)
 
-- **Record Count**: Determine the total number of records in the dataset.
-- **Customer Count**: Find out how many unique customers are in the dataset.
-- **Category Count**: Identify all unique product categories in the dataset.
-- **Null Value Check**: Check for any null values in the dataset and delete records with missing data.
+### 3. Data Analysis & Visualization
 
-```sql
-SELECT COUNT(*) FROM retail_sales;
-SELECT COUNT(DISTINCT customer_id) FROM retail_sales;
-SELECT DISTINCT category FROM retail_sales;
+The following pyhton query  were developed to answer specific business questions:
 
-SELECT * FROM retail_sales
-WHERE 
-    sale_date IS NULL OR sale_time IS NULL OR customer_id IS NULL OR 
-    gender IS NULL OR age IS NULL OR category IS NULL OR 
-    quantity IS NULL OR price_per_unit IS NULL OR cogs IS NULL;
-
-DELETE FROM retail_sales
-WHERE 
-    sale_date IS NULL OR sale_time IS NULL OR customer_id IS NULL OR 
-    gender IS NULL OR age IS NULL OR category IS NULL OR 
-    quantity IS NULL OR price_per_unit IS NULL OR cogs IS NULL;
+1. **# what is the distribution of listing prices?
+```pyhton
+plt.figure(figsize=(10,5))
+sns.histplot(df['price'], bins=50, kde=True, color='red')
+sns.title('Distribution of listing price')
+sns.xtitle('price')
+sns.ytitle('Frequency')
+plt.show()
 ```
+- Most listings are under $1200
+- Wide range with a long right tail
 
-### 3. Data Analysis & Findings
-
-The following SQL queries were developed to answer specific business questions:
-
-1. **Write a SQL query to retrieve all columns for sales made on '2022-11-05**:
-```sql
-SELECT *
-FROM retail_sales
-WHERE sale_date = '2022-11-05';
+2. **# how are different room types distributed?:
+```pyhton
+plt.figure(figsize=(10,5))
+sns.countplot(x = 'room type', data = df, color='skyblue')
+plt.title('room type distribution')
+plt.xlabel('Room Type')
+plt.ylabel('Count')
+plt.show()
 ```
+- Entire home/apartment dominates
+- Private room is the next most common
+- Shared rooms and hotel rooms are minimal
 
-2. **Write a SQL query to retrieve all transactions where the category is 'Clothing' and the quantity sold is more than 4 in the month of Nov-2022**:
-```sql
-SELECT 
-  *
-FROM retail_sales
-WHERE 
-    category = 'Clothing'
-    AND 
-    TO_CHAR(sale_date, 'YYYY-MM') = '2022-11'
-    AND
-    quantity >= 4
+3. **# How are listings distributed across different neighborhoods?**:
+```python
+plt.figure(figsize=(12,8))
+sns.countplot(y= 'neighbourhood group', data=df, color='lightpink', order=df['neighbourhood group'].value_counts().index)
+plt.title('Number of listing By Neighbourhood froup')
+plt.xlabel('Count')
+plt.ylabel('Neighbourhood group')
+plt.show()
 ```
+- Manhattan and Brooklyn lead in listing volume
+- Queens is third
+- Bronx and Staten Island have fewer listings
 
-3. **Write a SQL query to calculate the total sales (total_sale) for each category.**:
-```sql
-SELECT 
-    category,
-    SUM(total_sale) as net_sale,
-    COUNT(*) as total_orders
-FROM retail_sales
-GROUP BY 1
-```
+4. **# what is relationship Between price and room type ?**:
+```python
+plt.figure(figsize=(10,5))
 
-4. **Write a SQL query to find the average age of customers who purchased items from the 'Beauty' category.**:
-```sql
-SELECT
-    ROUND(AVG(age), 2) as avg_age
-FROM retail_sales
-WHERE category = 'Beauty'
+sns.boxplot(x='room type', y='price', hue='room type', data=df, palette='coolwarm')
+plt.title('Price Vs Room Type')
+plt.xlabel('Room Type')
+plt.ylabel('Price ($)')
+plt.show()
 ```
+- Shared rooms are the cheapest
+- Entire homes and hotel rooms are higher priced
 
-5. **Write a SQL query to find all transactions where the total_sale is greater than 1000.**:
-```sql
-SELECT * FROM retail_sales
-WHERE total_sale > 1000
-```
+5. ** how has the number of reviews change over with time?**:
+```pyhton
+df['last review'] =  pd.to_datetime(df['last review'])
+reviews_over_time = df.groupby(df['last review'].dt.to_period('M')).size()
 
-6. **Write a SQL query to find the total number of transactions (transaction_id) made by each gender in each category.**:
-```sql
-SELECT 
-    category,
-    gender,
-    COUNT(*) as total_trans
-FROM retail_sales
-GROUP 
-    BY 
-    category,
-    gender
-ORDER BY 1
+plt.figure(figsize=(10,5))
+reviews_over_time.plot(kind='line', color='yellow')
+plt.title('Review change Over Time')
+plt.xlabel('Date')
+plt.ylabel('Number of Reviews')
+plt.show()
 ```
-
-7. **Write a SQL query to calculate the average sale for each month. Find out best selling month in each year**:
-```sql
-SELECT 
-       year,
-       month,
-    avg_sale
-FROM 
-(    
-SELECT 
-    EXTRACT(YEAR FROM sale_date) as year,
-    EXTRACT(MONTH FROM sale_date) as month,
-    AVG(total_sale) as avg_sale,
-    RANK() OVER(PARTITION BY EXTRACT(YEAR FROM sale_date) ORDER BY AVG(total_sale) DESC) as rank
-FROM retail_sales
-GROUP BY 1, 2
-) as t1
-WHERE rank = 1
-```
-
-8. **Write a SQL query to find the top 5 customers based on the highest total sales **:
-```sql
-SELECT 
-    customer_id,
-    SUM(total_sale) as total_sales
-FROM retail_sales
-GROUP BY 1
-ORDER BY 2 DESC
-LIMIT 5
-```
-
-9. **Write a SQL query to find the number of unique customers who purchased items from each category.**:
-```sql
-SELECT 
-    category,    
-    COUNT(DISTINCT customer_id) as cnt_unique_cs
-FROM retail_sales
-GROUP BY category
-```
-
-10. **Write a SQL query to create each shift and number of orders (Example Morning <12, Afternoon Between 12 & 17, Evening >17)**:
-```sql
-WITH hourly_sale
-AS
-(
-SELECT *,
-    CASE
-        WHEN EXTRACT(HOUR FROM sale_time) < 12 THEN 'Morning'
-        WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
-        ELSE 'Evening'
-    END as shift
-FROM retail_sales
-)
-SELECT 
-    shift,
-    COUNT(*) as total_orders    
-FROM hourly_sale
-GROUP BY shift
-```
+- 2019 saw the highest activity
+- Sharp decline post-2020, likely due to COVID-19
 
 ## Findings
 
@@ -196,32 +161,37 @@ GROUP BY shift
 
 ## Reports
 
-- **Sales Summary**: A detailed report summarizing total sales, customer demographics, and category performance.
+- **Data Summary**: A detailed report summarizing total Booking, customer demographics, and category performance.
 - **Trend Analysis**: Insights into sales trends across different months and shifts.
 - **Customer Insights**: Reports on top customers and unique customer counts per category.
 
 ## Conclusion
 
-This project serves as a comprehensive introduction to SQL for data analysts, covering database setup, data cleaning, exploratory data analysis, and business-driven SQL queries. The findings from this project can help drive business decisions by understanding sales patterns, customer behavior, and product performance.
+This project presents a comprehensive exploratory data analysis of Airbnb listings in New York City. By cleaning the dataset, handling missing values, and visualizing key metrics, we uncovered meaningful insights into pricing trends, room type popularity, neighborhood distributions, and review patterns over time.
+
+Key takeaways:
+
+Manhattan and Brooklyn dominate Airbnb listings, reflecting their popularity among travelers.
+
+Entire home/apartment listings are the most common and command higher prices.
+
+Price ranges vary widely, but most listings are under $1200 per night.
+
+Reviews spiked in 2019, offering clues to peak usage before the COVID-19 dip.
+
+Room types and pricing are strongly correlated, with shared rooms being the most affordable.
+
+This analysis not only helps hosts optimize pricing strategies but also assists potential travelers in identifying budget-friendly and popular areas. For data analysts, this project showcases proficiency in data cleaning, EDA, visualization, and storytelling — all critical skills for real-world analytical roles.
 
 ## How to Use
 
 1. **Clone the Repository**: Clone this project repository from GitHub.
-2. **Set Up the Database**: Run the SQL scripts provided in the `database_setup.sql` file to create and populate the database.
-3. **Run the Queries**: Use the SQL queries provided in the `analysis_queries.sql` file to perform your analysis.
+2. **Set Up the Database**: Run the pyhton scripts provided in the `Airbnb_open_data` file to create and populate the database.
+3. **Run the Queries**: Use the pyhton Library provided in the `Airbnb_Analysis` file to perform your analysis.
 4. **Explore and Modify**: Feel free to modify the queries to explore different aspects of the dataset or answer additional business questions.
 
-## Author - Zero Analyst
+## Author - jauwad jamal
 
-This project is part of my portfolio, showcasing the SQL skills essential for data analyst roles. If you have any questions, feedback, or would like to collaborate, feel free to get in touch!
+This project is part of my portfolio, showcasing the pyhton/ Analytics skills essential for data analyst roles. If you have any questions, feedback, or would like to collaborate, feel free to get in touch!
 
-### Stay Updated and Join the Community
 
-For more content on SQL, data analysis, and other data-related topics, make sure to follow me on social media and join our community:
-
-- **YouTube**: [Subscribe to my channel for tutorials and insights](https://www.youtube.com/@zero_analyst)
-- **Instagram**: [Follow me for daily tips and updates](https://www.instagram.com/zero_analyst/)
-- **LinkedIn**: [Connect with me professionally](https://www.linkedin.com/in/najirr)
-- **Discord**: [Join our community to learn and grow together](https://discord.gg/36h5f2Z5PK)
-
-Thank you for your support, and I look forward to connecting with you!
